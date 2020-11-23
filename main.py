@@ -8,22 +8,22 @@ from model import colors as c
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-learning_rate, batch_size, epochs = 1e-3, 128, 512
+learning_rate, batch_size, epochs = 1e-3, 256, 512
 
 # loads the `word` column of `unigram_freq.csv` and lower-cases it.
-series = pd.read_csv('unigram_freq.csv')['word'].str.lower()[:2**12]
+series = pd.read_csv('unigram_freq.csv')['word'].str.lower()[:2**13]
 max_len = series.str.len().max().astype(int) # longest word is 13 chars
 train_x, train_y, test_x, test_y = build_data(series, min_len = 3, max_len = max_len)
 max_index = int(max(train_x.max(), test_x.max()))
 
 args = {
-    'emb_dim':        8,             # Embedding vector dimension
-    'n_att_heads':    8,             # Number of attention heads for each transformer block
+    'emb_dim':        16,            # Embedding vector dimension
+    'n_att_heads':    4,             # Number of attention heads for each transformer block
     'n_transformers': 4,             # Depth of the network (nr. of self-attention layers)
     'seq_length':     max_len,       # Sequence length
     'num_tokens':     max_index + 1, # Vocabulary size (highest index found in dataset)
     'device':         device,        # Device: cuda/cpu
-    'wide':           True
+    'wide':           False          # Narrow or wide self-attention
 }
 
 stats = { 'loss': [], 'perplexity': [] } # we accomulate and save training statistics here
@@ -54,6 +54,7 @@ for i in range(epochs):
     stats['perplexity'].append(perplexity)
     
     sampled  = sample_sentence(model, "z", max_len = max_len, temperature = 0.5)
+    
     to_print = [
         f"{c.HEADER}EPOCH %03d"        % i,
         f"{c.OKBLUE}LOSS %4.4f"        % stats['loss'][-1],

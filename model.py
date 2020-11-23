@@ -282,8 +282,8 @@ def build_data(series, min_len = 3, max_len = 140):
     for i, word in enumerate(series):
         try: word.encode(encoding='utf-8').decode('ascii')
         except UnicodeDecodeError: continue
-        inputs[i,  0:len(word)]   = torch.from_numpy(np.frombuffer(str.encode(word), np.uint8))
-        targets[i, 0:len(word)-1] = torch.from_numpy(np.frombuffer(str.encode(word[1:]), np.uint8))
+        inputs[i,  0:len(word)]   = torch.from_numpy(np.frombuffer(str.encode(word), np.uint8).copy())
+        targets[i, 0:len(word)-1] = torch.from_numpy(np.frombuffer(str.encode(word[1:]), np.uint8).copy())
         targets[i, len(word)-1]   = 1  # <EOS> token
 
     # Split into train and test dataset
